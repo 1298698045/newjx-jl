@@ -1,0 +1,20 @@
+{
+    "navigationBarTitleText": "课表",
+    "usingComponents": {
+    "i-cell-group": "/static/view/cell-group/index",
+    "i-cell": "/static/view/cell/index",
+    "i-panel": "/static/view/panel/index",
+    "i-spin": "/static/view/spin/index",
+    "i-divider": "/static/view/divider/index",
+    "i-collapse": "/static/view/collapse/index",
+    "i-collapse-item": "/static/view/collapse-item/index",
+    "i-tabs": "/static/view/tabs/index",
+    "i-tab": "/static/view/tab/index",
+    "i-row": "/static/view/row/index",
+     "i-col": "/static/view/col/index",
+     "i-card": "/static/view/card/index",
+     "i-icon": "/static/view/icon/index",
+     "i-modal":"/static/view/modal/index",
+     "i-button":"/static/view/button/index"
+}
+}

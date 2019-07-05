@@ -1,0 +1,11 @@
+{
+    "navigationBarTitleText": "工作台",
+    "enablePullDownRefresh": false,
+    "usingComponents": {
+        "i-row": "/static/view/row/index",
+        "i-col": "/static/view/col/index",
+        "i-card": "/static/view/card/index",
+        "i-icon": "/static/view/icon/index",
+        "i-divider": "/static/view/divider/index"
+       }
+}

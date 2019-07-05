@@ -1,0 +1,68 @@
+{
+  "pages": [
+    "pages/tLogin/main",
+    "pages/newLogin/main",
+    "pages/login/main",
+    "pages/setupPass/main",
+    "pages/firstLogin/main",
+    "pages/workbench/main",
+    "pages/overtime/main",  
+    "pages/repairRegister/main",
+    "pages/timetable/main",  
+    "pages/index/main",
+    "pages/AskForLeave/main",   
+    "pages/replacementCar/main",
+    "pages/vacationRecords/main",
+     "pages/overtimeControl/main",
+    "pages/quitApply/main",
+    "pages/fuelRecord/main",
+    "pages/fuelReport/main",
+    "pages/toExamine/main",
+    "pages/changePassword/main",  
+    "pages/my/main",
+    "pages/totalPassRate/main",
+    "pages/teachStudent/main",
+    "pages/repairRecord/main",
+    "pages/repairCost/main",
+    "pages/myIntroduce/main",
+    "pages/turnIntroduction/main",
+    "pages/lookupStudent/main",
+    "pages/posterAdmin/main",
+    "pages/friends/main",
+    "pages/clue/main",
+    "pages/clueDetail/main",
+    "pages/clueAdd/main",
+    "pages/feedback/main",
+    "pages/activity/main",
+    "pages/activityDetail/main",
+    "pages/wimg/main"
+
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#f6f6f6",
+    "navigationBarTitleText": "爱加教练",
+    "navigationBarTextStyle": "black"
+  },
+  "navigateToMiniProgramAppIdList": ["wxe825ca816def4b19"],
+  "tabBar": {
+    "color": "#aeaeae",
+    "selectedColor": "#ff3f00",
+    "list": [{
+    "pagePath": "pages/timetable/main",
+    "text": "课表",
+    "iconPath": "static/images/schedule.png",
+    "selectedIconPath": "static/images/schedule-active.png"
+    }, {
+    "pagePath": "pages/workbench/main",
+    "text": "工作台",
+    "iconPath": "static/images/works.png",
+    "selectedIconPath": "static/images/works-active.png"
+    }, {
+    "pagePath": "pages/my/main",
+    "text": "我的",
+    "iconPath": "static/images/mine.png",
+    "selectedIconPath": "static/images/mine-active.png"
+    }]
+  }
+}

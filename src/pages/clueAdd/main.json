@@ -1,0 +1,10 @@
+{
+  "usingComponents": {
+    "i-input": "/static/view/input/index",
+    "i-card": "/static/view/card/index",
+    "i-icon": "/static/view/icon/index",
+    "i-button":"/static/view/button/index",
+    "i-panel":"/static/view/panel/index",
+    "i-modal":"/static/view/modal/index"
+}
+}

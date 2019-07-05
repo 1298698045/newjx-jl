@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "线索详情",
+  "usingComponents": {
+    "i-input": "/static/view/input/index",
+    "i-card": "/static/view/card/index",
+    "i-icon": "/static/view/icon/index",
+    "i-row": "/static/view/row/index",
+    "i-col": "/static/view/col/index",
+    "i-button":"/static/view/button/index",
+    "i-modal":"/static/view/modal/index"
+}
+}

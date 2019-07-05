@@ -1,0 +1,15 @@
+{
+    "navigationBarTitleText": "维修提报-登记",
+    "usingComponents": {
+     "i-row": "/static/view/row/index",
+     "i-col": "/static/view/col/index",
+     "i-card": "/static/view/card/index",
+     "i-icon": "/static/view/icon/index",
+     "i-divider": "/static/view/divider/index",
+     "i-cell-group": "/static/view/cell-group/index",
+     "i-cell": "/static/view/cell/index",
+     "i-input": "/static/view/input/index",
+     "i-card": "/static/view/card/index",
+     "i-icon": "/static/view/icon/index"
+	}
+}

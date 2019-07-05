@@ -1,0 +1,21 @@
+{
+    "navigationBarTitleText": "早晚班",
+    "enablePullDownRefresh": true,
+    "onReachBottomDistance":50,
+    "usingComponents": {
+     "i-row": "/static/view/row/index",
+     "i-col": "/static/view/col/index",
+     "i-card": "/static/view/card/index",
+     "i-icon": "/static/view/icon/index",
+     "i-divider": "/static/view/divider/index",
+     "i-cell-group": "/static/view/cell-group/index",
+     "i-cell": "/static/view/cell/index",
+     "i-input": "/static/view/input/index",
+     "i-card": "/static/view/card/index",
+     "i-icon": "/static/view/icon/index",
+     "i-modal": "/static/view/modal/index",
+     "i-button": "/static/view/button/index",
+     "i-switch": "/static/view/switch/index",
+     "i-modal": "/static/view/modal/index"
+	}
+}

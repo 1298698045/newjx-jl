@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "注册",
+  "usingComponents": {
+    "i-input": "/static/view/input/index",
+    "i-card": "/static/view/card/index",
+    "i-icon": "/static/view/icon/index"
+}
+}

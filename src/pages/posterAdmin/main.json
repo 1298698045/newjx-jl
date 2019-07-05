@@ -1,0 +1,15 @@
+{
+    "navigationBarTitleText": "海报管理",
+    "enablePullDownRefresh":false,
+    "usingComponents": {
+        "i-row": "/static/view/row/index",
+        "i-col": "/static/view/col/index",
+        "i-card": "/static/view/card/index",
+        "i-icon": "/static/view/icon/index",
+        "i-divider": "/static/view/divider/index",
+        "i-panel":"/static/view/panel/index",
+        "i-input":"/static/view/input/index",
+        "i-collapse": "/static/view/collapse/index",
+        "i-collapse-item": "/static/view/collapse-item/index"
+       }
+}
