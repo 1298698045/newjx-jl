@@ -35,7 +35,13 @@
                     <i-col span="4">
                         <p>开团数：<span>{{item.startGroupNum || ''}}</span></p>
                     </i-col>
-                    <i-col span="13">
+                    <i-col span="3" v-if="item.type=='REDUCTION'">
+                        <p>&nbsp;</p>
+                    </i-col>
+                    <i-col span="4" v-if="item.type=='COMMON'">
+                        <p>成团数：<span>{{item.successGroupNum}}</span></p>
+                    </i-col>
+                    <i-col span="9">
                         <p>参团人数：<span>{{item.joinGroupUserNum || ''}}</span></p>
                     </i-col>
                     <i-col span="7">
@@ -70,7 +76,7 @@
 export default {
     data(){
         return {
-            imgUrl:'http://aplusyx.oss-cn-beijing.aliyuncs.com/',
+            imgUrl:'http://oss-dev.aplusx.com/',
             current:'tab1',
             userInfo:"",
             list:[],
@@ -85,19 +91,23 @@ export default {
             pageNoT:1,
             pageSizeT:10,
             totalPageT:0,
-            type:""
+            type:"",
+            employeeId:"",
+            tenantId:""
         }
     },
     onLoad(){
+        this.employeeId = wx.getStorageSync('employeeId');
+        this.tenantId = wx.getStorageSync('tenantId');
         this.current = 'tab1';
         this.queryLlist();
     },
     methods: {
         queryLlist(){
-            this.$httpWX.post({
+            this.$fetch.post({
                 url:this.$api.activity.getPageList,
                 data:{
-                    schoolId:String(wx.getStorageSync('schoolId')),
+                    schoolId:this.tenantId,
                     // schoolId:'1',
                     status:"PROGRESS",
                     pageNo:this.pageNo,
@@ -122,10 +132,10 @@ export default {
             })
         },
         myQuery(){
-            this.$httpWX.post({
+            this.$fetch.post({
                 url:this.$api.activity.myGroups,
                 data:{
-                    employeeId:wx.getStorageSync('userId'),
+                    employeeId:this.employeeId,
                     pageNo:this.pageNoT,
                     pageSize:this.pageSizeT
                 }
@@ -160,7 +170,7 @@ export default {
             this.id = item.id;
             this.docid = item.docid;
             const type = item.type;
-            const url = '/pages/activityDetail/main?id='+this.id+'&docid='+this.docid + '&employeeId='+wx.getStorageSync('userId')+'&type='+type;
+            const url = '/pages/activityDetail/main?id='+this.id+'&docid='+this.docid + '&employeeId='+this.employeeId+'&type='+type;
             wx.navigateTo({url:url});
         },
         bindGetUserInfo(item){
@@ -172,7 +182,7 @@ export default {
                 success(res) {
                     console.log(res);
                     if(res.code){
-                        that.$httpWX.get({
+                        that.$fetch.get({
                             url:that.$api.userInfo.getOpenid+"/"+res.code,
                             data:{
 
@@ -192,16 +202,16 @@ export default {
                                     success(res) {
                                         console.log(res.userInfo)
                                         that.userInfo = res.userInfo;
-                                        that.userInfo.employeeId = wx.getStorageSync("userId");
-                                        that.userInfo.schoolId = wx.getStorageSync("schoolId");
-                                        that.userInfo.employeeName = wx.getStorageSync("userName");
-                                        that.userInfo.employeePhone = wx.getStorageSync("phone");
+                                        that.userInfo.employeeId = that.employeeId;
+                                        that.userInfo.schoolId = that.tenantId;
+                                        that.userInfo.employeeName = wx.getStorageSync('coachName');
+                                        that.userInfo.employeePhone = wx.getStorageSync("mobile");
                                         that.userInfo.id = that.id;
                                         that.userInfo.mode = '1';
                                         that.userInfo.coachMark = true; // 教练标识
                                         var userInfo = JSON.stringify(that.userInfo);
                                         wx.navigateToMiniProgram({
-                                            appId: 'wxe825ca816def4b19',
+                                            appId: 'wx7ef4b13584f6cb2e',
                                             path: 'pages/activityDetail/main?userInfo='+userInfo+'&type='+that.type,
                                             extraData: {
                                                 foo: 'bar'
@@ -228,15 +238,15 @@ export default {
 
         // 提交教练信息
         getSubmit(){
-            this.$httpWX.post({
+            this.$fetch.post({
                 url:this.$api.activity.saveEmployee,
                 data:{
                     openid:this.openid,
                     headUrl:this.userInfo.avatarUrl,
-                    employeeId:wx.getStorageSync("userId"),
-                    employeeName:wx.getStorageSync("userName"),
-                    employeePhone:wx.getStorageSync("phone"),
-                    schoolId:String(wx.getStorageSync("schoolId"))
+                    employeeId:this.employeeId,
+                    employeeName:wx.getStorageSync("coachName"),
+                    employeePhone:wx.getStorageSync("mobile"),
+                    schoolId:this.tenantId
                 }
             }).then(res=>{
                 console.log(res);

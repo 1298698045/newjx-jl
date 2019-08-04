@@ -28,13 +28,16 @@
       </div>
       <div class="card-box">
         <div class="flex-box" v-for="(item,index) in arrays" :key="index">
-          <div class="flex-item">{{item.trainingDate}}</div>
+          <div class="flex-item">{{item.courseDate}}</div>
           <div class="flex-item" style="font-weight:bold;">{{item.startTime}}-{{item.endTime}}</div>
           <div class="flex-item">
             <!-- {{item.class}} -->
+            <span :class="item.enableFlag=='1'?'start_span':''">{{item.status==0?'关闭':item.status==1?'开启':'锁定'}}</span>
             <i-switch
-              :value="item.enableFlag=='0'?false:item.enableFlag=='1'?true:''"
+              :i-class="item.status==1?'i-switch-checked':''"
+              :value="item.status==0?false:item.stauts==1?true:''"
               @change="onChange($event,index,item)"
+              :disabled="item.placeNum!=0&&item.studentNum!=0?true:false"
               slot="footer"
             ></i-switch>
           </div>
@@ -103,12 +106,16 @@ export default {
       page: 1,
       pageSize: 10,
       isPage: true, // 是否可以翻页
-      height:""
+      height:"",
+      disabled:false,
+      employeeId:""
     };
   },
   onLoad() {
     // this.getQueryAll();
-    this.getQuery();
+    // this.getQuery();
+    this.employeeId = wx.getStorageSync('employeeId');
+    this.query();
     let that = this;
     wx.getSystemInfo({
       success: function(res) {
@@ -119,6 +126,36 @@ export default {
     console.log(this.height);
   },
   methods: {
+    query(isNew){
+      this.$httpWX.post({
+        url:this.$api.work.query,
+        data:{
+          params:{
+            coachId:this.employeeId
+          },
+          pagination:{
+            current:this.page,
+            pageSize:this.pageSize
+          }
+        }
+      }).then(res=>{
+        console.log(res);
+        this.arrays = res.data.list;
+        if (this.page * this.pageSize <= res.data.pagination.total) {
+            this.isPage = true;
+          } else {
+            this.isPage = false;
+          }
+          let temp = [];
+          if (this.page == 1) {
+            temp = res.data.list;
+          } else {
+            temp = this.arrays.concat(res.data.list);
+          }
+          this.arrays = temp;
+          console.log(this.arrays);
+      })
+    },
     // 日期
     getQueryAll() {
       this.$httpWX
@@ -139,83 +176,69 @@ export default {
     getSerach() {
       this.$httpWX
         .post({
-          url: this.$api.work.queryAll,
+          url: this.$api.work.query,
           data: {
-            // enableFlag: 1,
-            coachId: wx.getStorageSync("userId"),
-            overtimeFlag: 1,
-            trainingDateStart: this.date,
-            trainingDateEnd: this.dateTwo
+            coachId: this.employeeId,
+            startDate: this.date,
+            endDate: this.dateTwo
           }
         })
         .then(res => {
-          this.arrays = res.content.item;
-          this.getQuery();
+          this.arrays = res.data.list;
         });
     },
     onChange(event, i, item) {
-      // console.log(this.arrays[i].enableFlag);
-      // console.log(item.startTime,item.endTime);
-      // this.arrays[i].enableFlag = event.target.value;
-      // console.log(this.arrays[i].enableFlag);
-      if (this.arrays[i].enableFlag == "0") {
+      if (this.arrays[i].status == 0) {
         this.$httpWX
-          .get({
-            url: this.$api.work.start + "/" + item.id,
+          .post({
+            url: this.$api.work.start,
             data: {
-              // coachId:wx.getStorageSync('userId'),
-              // startDate:this.date,
-              // endDate:this.dateTwo,
-              // startTime:item.startTime,
-              // endTime:item.endTime,
-              // eqFlag:1,
-              // openFlag:1
+              params:{
+                courseIds:[item.id]
+              }
             }
           })
           .then(res => {
-            console.log("123", res);
             wx.showLoading();
             wx.hideLoading();
             setTimeout( () => {
               wx.showToast({
-                title: res.status.message,
+                title: res.msg,
                 icon: "none",
               });
               setTimeout( () =>{
                 wx.hideToast();  
               },2000)
             },10);
-            if(res.status.code=='10'){
-              this.arrays[i].enableFlag = event.target.value;
+            if(res.code==0){
+              this.arrays[i].status = true;
             }
-            // this.getQuery();
-            // if(res.responseCode == '10'){
-            //   this.visible = true;
-            // }
           });
-      } else if (this.arrays[i].enableFlag == "1") {
+      } else if (this.arrays[i].status == 1) {
         this.$httpWX
-          .get({
-            url: this.$api.work.stop + "/" + item.id,
-            data: {}
+          .post({
+            url: this.$api.work.stop,
+            data: {
+              params:{
+                courseIds:[item.id]
+              }
+            }
           })
           .then(res => {
-            console.log("123", res);
             wx.showLoading();
             wx.hideLoading();
             setTimeout( () => {
               wx.showToast({
-                title: res.status.message,
+                title: res.msg,
                 icon: "none",
               });
               setTimeout( () =>{
                 wx.hideToast();  
               },2000)
             },10);
-            if(res.status.code=='10'){
-              this.arrays[i].enableFlag = event.target.value;
+            if(res.code==0){
+              this.arrays[i].status = false;
             }
-            // this.getQuery();
           });
       }
     },
@@ -244,7 +267,7 @@ export default {
         })
         .then(res => {
           console.log(res);
-          // this.arrays = res.content.item;
+          this.arrays = res.content.item;
           if (this.page * this.pageSize <= res.content.totalNum) {
             this.isPage = true;
           } else {
@@ -270,7 +293,7 @@ export default {
   onPullDownRefresh() {
     this.isPage = true;
     this.page = 1;
-    this.getQuery();
+    this.query();
     wx.stopPullDownRefresh();
   },
   /**
@@ -279,7 +302,7 @@ export default {
   onReachBottom: function() {
     if (this.isPage) {
       this.page++;
-      this.getQuery();
+      this.query();
     }
   }
 };
@@ -330,6 +353,21 @@ export default {
 .flex-item {
   color: 12px;
   padding: 3px 6px;
+  .i-switch-checked{
+    border-color: #08b906!important;
+    background: #08b906!important;
+  }
+  span{
+    font-size: 24rpx;
+    color: #a4a4a4;
+    margin-right: 20rpx;
+  }
+  .start_span{
+    color: #08b906;
+  }
+  .locking_span{
+    color: #fb1c15;
+  }
 }
 // .flex-item:last-child{
 //   text-align: center;

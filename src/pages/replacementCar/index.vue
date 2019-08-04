@@ -17,7 +17,7 @@
       <i-divider content="可更换车辆" color="" lineColor="#8E8E8E"></i-divider>
     </div>
     <div class="box" v-if="carNumber.length >0" v-for ="(items,index) in carNumber" :key="index">
-      <div class="item" :class="{active:num==index}"><button class="btn_" @click="getClick(index,items.id)">{{items.licenceNum}}</button></div>
+      <div class="item" :class="{active:num==index}"><button class="btn_" @click="getClick(index,items.id)">{{items.plateNo}}</button></div>
     </div>  
     <div class="box empty" v-if="carNumber.length == 0" >
         暂无其他可用车辆
@@ -40,28 +40,30 @@
         carNow:'',
         carNumber:[],
         carId:"",
+        employeeId:""
       }
     },
     onLoad(){
+      this.employeeId = wx.getStorageSync('employeeId');
       this.getQuery();
     },
     methods:{
       getQuery(){
-        this.$httpWX.get({
-        url:this.$api.car.getBindCarList+'/'+wx.getStorageSync('userId'),
-        // url:'/v1/aplus-jx-finance/car/getBindCarList/'+ 34,
-
+        this.$httpWX.post({
+        url:this.$api.car.getBindCarList,
         data:{
-          
+            params:{
+              employeeId:this.employeeId
+            }
         }
       }).then(res=>{
         console.log(res);
-        console.log(res.content.currentCar);
-        if(res.content.currentCar!=""){
-          this.carNow = res.content.currentCar[0].licenceNum;
+        // console.log(res.content.currentCar);
+        if(res.data.list!=""){
+          this.carNow = res.data.list[0].plateNo;
         }
-        this.carNumber = res.content.ableReplaceCarList;
-        console.log(this.carNow);
+        this.carNumber = res.data.list;
+        // console.log(this.carNow);
       })
       },
       getSave(){
@@ -69,9 +71,12 @@
           return false;
         }else {
           this.$httpWX.post({
-            url:this.$api.car.changeCar+"/"+this.carId+'/'+wx.getStorageSync('userId'),
+            url:this.$api.car.changeCar,
             data:{
-  
+              params:{
+                employeeId:this.employeeId,
+                carId:this.carId
+              }
             }
           }).then(res=>{
             console.log(res);
@@ -79,14 +84,14 @@
             wx.hideLoading();
             setTimeout( () => {
               wx.showToast({
-                title: res.status.message,
+                title: res.data,
                 icon: "none",
               });
               setTimeout( () =>{
                 wx.hideToast();  
               },2000)
             },0);
-            if(res.status.code=='10'){
+            if(res.code==0){
               this.num = -1;
             }
             this.getQuery();

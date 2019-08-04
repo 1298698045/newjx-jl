@@ -12,11 +12,11 @@
         </i-col>
         <i-col span="8" i-class="align">
           <div>
-            <p>主职：{{dutyName}}</p>
-            <p>兼职：</p>
+            <p>主职：{{departmentName || ''}}</p>
+            <p>兼职：{{dutyName || ''}}</p>
           </div>
         </i-col>
-        <i-col span="5" i-class="r">
+        <!-- <i-col span="5" i-class="r">
           <div v-if="coachDetail.employeeQrCode==''" @click="getQRcode">
             <p><i class="iconfont icon-tu" style="font-size:50rpx;"></i></p>
             <p>生成二维码</p>
@@ -24,7 +24,7 @@
           <div class="imgs"  v-if="coachDetail.employeeQrCode!=''" @click="getImgage">
             <img :src="qrcodeUrl+coachDetail.employeeQrCode" alt="" />
           </div>
-        </i-col>
+        </i-col> -->
       </i-row>
     </div>
     <!-- 我的 -->
@@ -76,13 +76,13 @@
       <div class="centerWrap">
         <div class="cont-box"  @click="getClue">
           <div>
-            <h3>{{clueCount}}</h3>
+            <h3>{{clueCount || 0}}</h3>
             <p>线索管理</p>
           </div>
         </div>
-        <div class="cont-box" @click="toPage('/pages/teachStudent/main')">
+        <div class="cont-box" @click="toPage('/pages/myStudent/main')">
           <div>
-            <h3>{{studentCont}}</h3>
+            <h3>{{studentCont || 0}}</h3>
             <p>我的学员</p>
           </div>
         </div>
@@ -180,9 +180,9 @@
           </p>
         </i-col>
     </i-row>
-    <div class="footer">
+    <!-- <div class="footer">
         <button class="quitBtn" @click="quitOut">退出登录</button>
-    </div>
+    </div> -->
     <i-modal i-class="modal" :visible="isModal" @ok="getOk" @cancel="getCanel">
       <div>
         <i-icon type="remind_fill" size="28" color="#fb6809" />
@@ -208,47 +208,23 @@ export default {
       coachDetail:{},
       coachSign:"", // 教练唯一标识
       qrcodeUrl:"https://aplusyx.oss-cn-beijing.aliyuncs.com/",
-      isModal:false
+      isModal:false,
+      list:"",
+      ptDepartId:"",
+      ptDepartId:""
     }
   },
-  onShow(){
-    // this.getQueryAll();
-    // this.getToken();
-    this.getCont();
-    this.getStudent();
-    this.getCheck().then(()=>{
-      this.getClues();
-    });
-  },
   onLoad(){
+    this.list = wx.getStorageSync('listData');
     this.getQueryAll();
     this.getCont();
     this.getStudent();
-    this.getCheck().then(()=>{
-      this.getClues();
-    });
   },
   methods: {
     // 意见反馈
     getFeedback(){
       const url = "/pages/feedback/main?name="+this.name;
       wx.navigateTo({url:url});
-    },
-    // 校验教练
-    getCheck(){
-      return new Promise((resolve,rejects)=>{
-        this.$httpWX.get({
-          url:this.$api.my.queryByTelphone+"/"+wx.getStorageSync('phone'),
-          data:{
-
-          }
-        }).then(res=>{
-          console.log(res);
-          this.coachDetail = res.content;
-          wx.setStorageSync('coachSign',this.coachDetail.code);
-          resolve();
-        })
-      })
     },
     // 线索统计数量
     getClues(){
@@ -294,56 +270,52 @@ export default {
         urls: [this.qrcodeUrl+this.coachDetail.employeeQrCode]
       })
     },
-    // 校验token
-      getToken(){
-        let token = wx.getStorageSync('token');
-        this.$httpWX.get({
-          url:this.$api.my.checkAuthentication+"/"+token,
-          data:{
-
-          }
-        }).then(res=>{
-          console.log('token',res);
-          if(res.status.code * 1 !== 10){
-            wx.showLoading();
-            wx.hideLoading();
-            setTimeout( () => {
-              wx.showToast({
-                title: '请重新登录!',
-                icon: "none",
-              });
-              setTimeout( () =>{
-                wx.hideToast();  
-              },2000)
-            },10);
-            wx.reLaunch({
-              url:"/pages/login/main"
-            })
-          }
-        })
-      },
     getStudent(){
-      this.$httpWX.get({
-        url:this.$api.my.myStudentCount+"/"+wx.getStorageSync('userId'),
+      this.$httpWX.post({
+        url:this.$api.my.myStudentCount+'/'+'58',
         data:{
-
         }
       }).then(res=>{
-        console.log(1,res);
-        this.studentCont = res.content;
+        this.studentCont = res.data;
       })
     },
     getQueryAll(){
-      this.$httpWX.get({
-        url:this.$api.my.employee+"/" + wx.getStorageSync('userId'),
+      this.$httpWX.post({
+        url:this.$api.public.coachDetail,
         data:{
-          
         }
       }).then(res=>{
         console.log(res);
-        this.name = res.content.name;
-        this.departmentName = res.content.departmentName;
-        this.dutyName = res.content.dutyName;
+        const {name,positionId,ptDepartId} = res.data;
+        this.name = name;
+        this.positionId = positionId;
+        this.ptDepartId = ptDepartId;
+        this.getPositionId();
+        this.getPtDepartId();
+      })
+    },
+    getPositionId(){
+      this.$httpWX.post({
+        url:this.$api.my.position,
+        data:{
+          params:{
+            positionId:this.positionId
+          }
+        }
+      }).then(res=>{
+        this.departmentName = res.data.title;
+      })
+    },
+    getPtDepartId(){
+      this.$httpWX.post({
+        url:this.$api.my.position,
+        data:{
+          params:{
+            positionId:this.ptDepartId
+          }
+        }
+      }).then(res=>{
+        this.dutyName = res.data.title;
       })
     },
     // 转介绍总数

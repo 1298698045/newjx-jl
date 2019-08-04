@@ -1,7 +1,9 @@
 {
-    "navigationBarTitleText": "好易驾",
+    "navigationBarTitleText": "我的学员",
     "enablePullDownRefresh": false,
     "usingComponents": {
+      "i-row":"/static/view/row/index",
+      "i-col":"/static/view/col/index",
       "i-input": "/static/view/input/index",
       "i-card": "/static/view/card/index",
       "i-icon": "/static/view/icon/index",
@@ -9,6 +11,8 @@
       "i-radio": "/static/view/radio/index",
       "van-field":"/static/vant/field/index",
       "van-button":"/static/vant/button/index",
-      "i-modal":"/static/view/modal/index"
+      "i-modal":"/static/view/modal/index",
+      "van-tab":"/static/vant/tab/index",
+      "van-tabs":"/static/vant/tabs/index"
     }
   }

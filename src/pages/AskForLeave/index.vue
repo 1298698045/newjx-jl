@@ -1,36 +1,55 @@
 <template>
   <div class="wrap">
     <div class="center">
-      <i-row i-class="rows">
-        <i-col span="16" i-class="colL">
-          <div class="left">
-            <p>{{carStyle==null?'0':carStyle}}</p>
-            <h3>本周剩余休假次数</h3>
-          </div>
-        </i-col>
-        <i-col span="8" i-class="colR">
+      <div class="rows">
           <p @click="record">
             <i-icon type="activity" size="20" color="#fb7015" />
-            休假记录</p>
-        </i-col>
-      </i-row>
+            休假记录
+          </p>
+      </div>
 
       <div class="boxWrap">
         <div class="container">
           <i-row i-class="row">
             <i-col span="6" i-class="l">
-              <p>休息日期</p>
+              <p>开始时间<span>*</span></p>
             </i-col>
-            <picker mode="date" :value="date" v-on:change="bindDateChange">
+            <!-- <picker mode="multiSelector" @change="bindMultiPickerChange" :value="multiIndex" :range="newMultiArray">
+            <span>当前时间：{{time}}</span>
+          </picker> -->
+            <picker mode="multiSelector" :value="multiIndex" @change="bindMultiPickerChange" :range="newMultiArray">
               <i-col span="18" i-class="r">
-                  <p>{{date}}</p>
+                  <p>
+                    <input type="text" :value="time" placeholder="选择时间" style="margin-top:20rpx;" disabled>
+                    <!-- {{time}} -->
+                  </p>
                   <i-icon type="activity" size="20" i-class="icon" color="#fb7015"/>
               </i-col>
             </picker>
           </i-row>
-          <i-row i-class="row-panel">
+          <i-row i-class="row rowTop">
+            <i-col span="6" i-class="l">
+              <p>结束时间<span>*</span></p>
+            </i-col>
+            <picker mode="multiSelector" :value="endmultiIndex" @change="endbindMultiPickerChange" :range="newMultiArray">
+              <i-col span="18" i-class="r">
+                  <!-- <p><span v-if="endTime==''" style="color:#979797;">选择时间</span>{{endTime}}</p> -->
+                  <p><input type="text" :value="endTime" placeholder="选择时间" style="margin-top:20rpx;" disabled></p>
+                  <i-icon type="activity" size="20" i-class="icon" color="#fb7015"/>
+              </i-col>
+            </picker>
+          </i-row>
+          <i-row i-class="row rowTop">
+            <i-col span="6" i-class="l">
+              <p>休假原因<span>*</span></p>
+            </i-col>
+              <i-col span="18" i-class="r textarea">
+                  <textarea class="area" v-model="reason" name="" id="" cols="30" rows="10" placeholder="请填写休假原因"></textarea>
+              </i-col>
+          </i-row>
+          <!-- <i-row i-class="row-panel">
             <i-col span="6" i-class="col-l">
-              <p>休息时间</p>
+              <p>结束时间<span>*</span></p>
             </i-col>
             <i-col span="18" i-class="col-r">
               <div>
@@ -40,10 +59,13 @@
                   下午<span style="font-size:24rpx;color:#fb7015;margin-left:10rpx;" v-if="pm=='1'">已约</span></button>
               </div>
             </i-col>
-          </i-row>
-
+          </i-row> -->
+          <!-- <picker mode="multiSelector" @change="bindMultiPickerChange" :value="multiIndex" :range="newMultiArray">
+            <span>当前时间：{{time}}</span>
+          </picker> -->
           <div class="footer">
-            <button @click="getSubmit" :disabled="disabled">申请休假</button>
+            <button @click="getSubmit">申请休假</button>
+            <h3>提示：申请提交后可联系相关人员进行审批。</h3>
           </div>
         </div>
       </div>
@@ -97,7 +119,7 @@
           <button class="btn_" @click="getSubmit" :disabled="disabled">保存</button>
         </i-row>
       </div> -->
-      <div>
+      <!-- <div>
         <i-divider content="规则说明" color="#5e5e5e" lineColor="#BDBDBD"></i-divider>
       </div>
       <div class="footer_info">
@@ -105,7 +127,7 @@
         <p>2. 仅可选择未被预约的时间，如需休息已被预约的时间，</p>
         <p>&nbsp;&nbsp;&nbsp;请联系您的直属上级。</p>
         <p>3. 单次休假0.5天</p>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -113,6 +135,7 @@
 export default {
   data() {
     return {
+      coachId:"",
       value:"",
       name: "cc",
       carStyle: "11",
@@ -127,8 +150,64 @@ export default {
       active2: false,
       orderAm: false,
       orderPm: true,
-      disabled:true
+      disabled:true,
+      time: "",
+      startDate:"",
+      startTime:"",
+      multiArray: [],
+      multiIndex: [0, 0, 0, 0, 0],
+      endmultiIndex:[0,0,0,0,0],
+      endTime:"",
+      endDate:"",
+      endtims:"",
+      reason:""
     };
+  },
+  computed: {
+    newMultiArray: () => {
+      let array = [];
+      const date = new Date();
+      const years = [];
+      const months = [];
+      const days = [];
+      const hours = [];
+      const minutes = [];
+      var d = new Date();
+      var y = d.getFullYear();
+      for (let i = y; i <= date.getFullYear() + 10; i++) {
+        years.push("" + i);
+      }
+      array.push(years);
+      for (let i = 1; i <= 12; i++) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        months.push("" + i);
+      }
+      array.push(months);
+      for (let i = 1; i <= 31; i++) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        days.push("" + i);
+      }
+      array.push(days);
+      for (let i = 0; i < 24; i++) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        hours.push("" + i);
+      }
+      array.push(hours);
+      for (let i = 0; i < 60; i++) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        minutes.push("" + i);
+      }
+      array.push(minutes);
+      return array;
+    }
   },
   created() {
     var d = new Date();
@@ -138,20 +217,37 @@ export default {
     this.date = y + "-" + m + "-" + day;
   },
   onLoad() {
-    this.getResidualTimes();
-    this.$httpWX.post({
-        url:this.$api.leave.gerRecordByCoachIdAndTime,
-        data:{
-          coachId:wx.getStorageSync('userId'),
-          trainingDate:this.date
-        }
-      }).then(res=>{
-        console.log(res);
-        this.am = res.content.am;
-        this.pm = res.content.pm;
-      })
+    this.coachId = wx.getStorageSync('employeeId');
   },
   methods: {
+    //获取时间日期
+    bindMultiPickerChange(e) {
+      this.multiIndex = e.target.value;
+      console.log("当前选择的时间", this.multiIndex);
+      const index = this.multiIndex;
+      const year = this.newMultiArray[0][index[0]];
+      const month = this.newMultiArray[1][index[1]];
+      const day = this.newMultiArray[2][index[2]];
+      const hour = this.newMultiArray[3][index[3]];
+      const minute = this.newMultiArray[4][index[4]];
+      this.time = year + "-" + month + "-" + day + " " + hour + ":" + minute;
+      this.startDate = year + "-" + month + "-" + day;
+      this.startTime = hour + ":" + minute + ":" + "00";
+      console.log(this.startDate,this.startTime);
+    },
+    endbindMultiPickerChange(e){
+      this.endmultiIndex = e.target.value;
+      console.log("当前选择的时间", this.multiIndex);
+      const index = this.endmultiIndex;
+      const year = this.newMultiArray[0][index[0]];
+      const month = this.newMultiArray[1][index[1]];
+      const day = this.newMultiArray[2][index[2]];
+      const hour = this.newMultiArray[3][index[3]];
+      const minute = this.newMultiArray[4][index[4]];
+      this.endTime = year + "-" + month + "-" + day + " " + hour + ":" + minute;
+      this.endDate = year + "-" + month + "-" + day;
+      this.endtims = hour + ":" + minute + ":" + "00";
+    },
     // 剩余次数
     getResidualTimes() {
       this.$httpWX
@@ -177,32 +273,32 @@ export default {
       this.$httpWX.post({
         url:this.$api.leave.off,
         data:{
-          leaveDate:this.date,
-          amFlag:this.value,
-          coachId:wx.getStorageSync('userId'),
-          coachName:wx.getStorageSync('coachName')
+          params:{
+            employeeId:this.coachId,
+            vacationStartDate:this.startDate,
+            vacationStartTime:this.startTime,
+            vacationEndDate:this.endDate,
+            vacationEndTime:this.endtims,
+            reason:this.reason
+          }
         }
       }).then(res=>{
         console.log(res);
         this.active1 = false;
         this.active2 = false;
-        // wx.showToast({
-        //   title: res.status.message,
-        //   icon: 'none',
-        //   duration: 2000
-        // })
-        wx.showLoading();
-        wx.hideLoading();
-        setTimeout( () => {
-          wx.showToast({
-            title: res.status.message,
-            icon: "none",
-          });
-          setTimeout( () =>{
-            wx.hideToast();  
-          },2000)
-        },500);
-        this.getResidualTimes();
+        wx.showToast({
+          title: res.data,
+          icon: 'none',
+          duration: 2000,
+          success:()=>{
+            if(res.code==0){
+              setTimeout(()=>{
+                const url = '/pages/vacationRecords/main';
+                wx.navigateTo({url:url});
+                },1000)
+              }
+          }
+        })
       })
     },
     bindDateChange: function(e) {
@@ -218,6 +314,9 @@ export default {
         this.am = res.content.am;
         this.pm = res.content.pm;
       })
+    },
+    bindDateChangeTime(e){
+      this.endTime = e.target.value;
     },
     handleTime(value) {
       if (value == "pm") {
@@ -249,18 +348,6 @@ export default {
    * 页面相关事件处理函数--监听用户下拉动作
    */
     onPullDownRefresh() {
-      this.getResidualTimes();
-      this.$httpWX.post({
-          url:this.$api.leave.gerRecordByCoachIdAndTime,
-          data:{
-            coachId:wx.getStorageSync('userId'),
-            trainingDate:this.date
-          }
-        }).then(res=>{
-          console.log(res);
-          this.am = res.content.am;
-          this.pm = res.content.pm;
-        })
       wx.stopPullDownRefresh();
     },
     /**
@@ -277,46 +364,20 @@ export default {
     width: 100%;
     height: 100%;
     .rows{
-      overflow: hidden;
-      .colL{
-        overflow: hidden;
-        .left{
-          width: 112px;
-          margin: 0 auto;
-          float: right;
-          p{
-            width: 44px;
-            height: 44px;
-            background: #fb7015;
-            text-align: center;
-            color: #fff;
-            line-height:44px;
-            font-size: 26px;
-            font-weight: bold;
-            border-radius:50%;
-            margin:30rpx 0 10rpx 30%;
-          }
-          h3{
-            font-size: 28rpx;
-            color: #9f9f9f;
-          }
-        }
-      }
-      .colR{
+        width: 100%;
         font-size: 28rpx;
         color: #fb7015;
         text-align: right;
+        margin:20px 0;
         p{
-          margin-top: 35px;
-          margin-right: 20rpx;
+          margin-right: 20px;
         }
-      }
     }
     .boxWrap{
       width: 100%;
       height: auto;
       margin: 30rpx 0;
-      background: #fff;
+      // background: #fff;
       border-top-left-radius: 30px;
       border-top-right-radius: 30px;
       font-size: 28rpx;
@@ -329,12 +390,15 @@ export default {
             font-size: 28rpx;
             p{
               line-height: 40px;
+              span{
+                color: #fb7015;
+              }
             }
           }
           .r{
             height: 45px;
-            line-height: 40px;
-            background: #efefef;
+            line-height: 45px;
+            background: #fff;
             padding:0 20rpx;
             overflow: hidden;
             border-radius:5px;
@@ -346,6 +410,20 @@ export default {
               line-height: 40px;
             }
           }
+          .textarea{
+            height: 138px;
+            overflow: hidden;
+            padding:20rpx;
+            .area{
+              width: 100%;
+              height: 100%;
+              line-height: 2;
+              border: none;
+            }
+          }
+        }
+        .rowTop{
+          margin-top: 20rpx;
         }
         .row-panel{
           margin: 40rpx 0;
@@ -353,10 +431,16 @@ export default {
             height: 34px;
             line-height: 34px;
             color: #4f4f4f;
+            span{
+              color: #fb7015;
+            }
           }
           .col-r{
             div{
               display: flex;
+              span{
+                color: #fb7015;
+              }
               button{
                 width: 115px;
                 height: 34px;
@@ -388,6 +472,12 @@ export default {
             border-radius: 21px;
             font-size:28rpx;
             color:#fff;
+          }
+          h3{
+            color: #9f9f9f;
+            font-size: 24rpx;
+            text-align: center;
+            margin-top: 20px;
           }
         }
       }

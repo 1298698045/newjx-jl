@@ -3,16 +3,16 @@
     <div class="nav_box">
       <div class="nav_item">
         <p>科目二</p>
-        <p>{{dataList.partTwoCourseHour}}课时</p>
+        <p>{{dataList.km2Lessons}}课时</p>
       </div>
       <!-- <div class="nav_item"></div> -->
       <div class="nav_item">
         <p>科目三</p>
-        <p>{{dataList.partThreeCourseHour}}课时</p>
+        <p>{{dataList.km3Lessons}}课时</p>
       </div>
       <div class="nav_item" style="border-left:1px solid #eaeaea;padding-left:30px;">
         <p>总计</p>
-        <p>{{dataList.totalCourseHour}}课时</p>
+        <p>{{dataList.km2Lessons+dataList.km3Lessons}}课时</p>
       </div>
     </div>
     <view class="container">
@@ -29,75 +29,38 @@
       <view class="right_content">
         <scroll-view scroll-y="true" style="" class="tab_panel">
           <view>
-            <view v-for="(items,i) in dataList.bookedRecordList" :key="i"> <!-- ({{i+1}})  現在是{{content}} -->
+            <view v-for="(val,key,i) in records" :key="i"> <!-- ({{i+1}})  現在是{{content}} -->
                <view class="caption-wrap">
                   <i-collapse name="123">
-                      <i-collapse-item  :title="items.interval+' '+ (items.subject=='KM002'?'科目二':'科目三')   +' '+items.signNum+'/'+items.bookedNum" :name="i" i-class-title="title_class" i-class="qwe">
-                          <view slot="content" style="overflow:auto;background:#fff;padding:5px;border-bottom:1rpx solid #f2f2f2;" v-for="(record,index) in items.recordList" :key="index">
+                      <i-collapse-item  :title="arr[key][0].a +'   '+ arr[key][0].km +'   '+(arr[key][0].num+'/'+arr[key][0].c)" :name="i" i-class-title="title_class" i-class="qwe">
+                          <view slot="content" style="overflow:auto;background:#fff;padding:5px;border-bottom:1rpx solid #f2f2f2;" v-for="(record,index) in val" :key="index">
                               <i-row i-class="rwo-wrap">
                                 <i-col span="8" i-class="col-l">
                                   <div class="text-box">
-                                    <p class="p-name">{{record.studentName}}</p>
-                                    <p class="p-phone">
-                                      <span>{{record.studentPhone}}</span>
+                                    <p class="p-name">{{record.name}}</p>
+                                    <p class="p-phone" @click="getCall(record.mobile)">
+                                      <span>{{record.mobile}}</span>
                                       </p>
                                   </div>
                                 </i-col>
                                 <i-col span="8" i-class="col-c">
                                   <div class="text-box">
                                     <p>
-                                      驾照类型: <span>{{record.trainingType=='PXLX001'?'A1':record.trainingType=='PXLX002'?'A2':record.trainingType=='PXLX003'?'A3':record.trainingType=='PXLX004'?'B1':record.trainingType=='PXLX005'?'B2'
-                                      :record.trainingType=='PXLX006'?'C1':record.trainingType=='PXLX007'?'C2':record.trainingType=='PXLX008'?'C3'
-                                      :record.trainingType=='PXLX009'?'C4':record.trainingType=='PXLX010'?'C5':record.trainingType=='PXLX011'?'D':record.trainingType=='PXLX012'?'E':record.trainingType=='PXLX013'?'F'
-                                      :record.trainingType=='PXLX014'?'M':record.trainingType=='PXLX015'?'N':record.trainingType=='PXLX016'?'P':''}}</span>
+                                      驾照类型: <span>{{record.licenseType}}</span>
                                     </p>
-                                    <p class="ps">已学课时: <span>{{record.studiedHour}}</span></p>
-                                    <p>班型:{{record.className}}</p>
+                                    <p class="ps">已学课时: <span>{{record.km2Lessons}}</span></p>
+                                    <p>班型:{{record.classTitle}}</p>
                                   </div>
                                 </i-col>
                                 <i-col span="8" i-class="col-r">
                                   <div>
-                                    <button v-if="record.status=='YKZT001'" disabled>待签到</button>
-                                    <button class="btn-confirm" v-if="record.status=='YKZT002'" @click="confirm(record.id)">待确认</button>
-                                    <button class="btn-sign" v-else-if="record.status=='YKZT003'" disabled>未签到</button>
-                                    <button class="btn-success" v-else-if="record.status=='YKZT004'" disabled>已完成</button>
+                                    <button v-if="record.signStatus=='0'" disabled>待签到</button>
+                                    <button class="btn-confirm" v-if="record.signStatus==1&&record.confirmStatus==0" @click="confirm(record.id)">待确认</button>
+                                    <!-- <button class="btn-sign" v-else-if="record.signStatus==0" disabled>未签到</button> -->
+                                    <button class="btn-success" v-else-if="record.confirmStatus==1" disabled>已完成</button>
                                   </div>
                                 </i-col>
                               </i-row>
-
-
-
-                              <!-- <i-col span="19" i-class="textPadding">
-                                <i-col span="24">
-                                  <view class="info_"> -->
-                                    <!-- <text class="titleName">{{record.studentName}}</text>
-                                    <text class="titleName">{{record.sex=='XB001'?'男':record.sex=='XB002'?'女':''}}</text>
-                                    <text class="titleName">{{record.studentPhone}}</text> -->
-                                    <!-- <p @click="getCall(record.studentPhone)" class="info_div info_tel"><i-icon type="mobilephone_fill" size="20" color="#fff" /></p> -->
-                                  <!-- </view>
-                                </i-col> -->
-                                <!-- <i-col span="24">
-                                  <div class="info_box" style="margin-top:5px;">
-                                    <div class="info_div">已学{{record.studiedHour}}课时</div>
-                                    <div class="info_div">{{record.trainingType=='PXLX001'?'A1':record.trainingType=='PXLX002'?'A2':record.trainingType=='PXLX003'?'A3':record.trainingType=='PXLX004'?'B1':record.trainingType=='PXLX005'?'B2'
-                                      :record.trainingType=='PXLX006'?'C1':record.trainingType=='PXLX007'?'C2':record.trainingType=='PXLX008'?'C3'
-                                      :record.trainingType=='PXLX009'?'C4':record.trainingType=='PXLX010'?'C5':record.trainingType=='PXLX011'?'D':record.trainingType=='PXLX012'?'E':record.trainingType=='PXLX013'?'F'
-                                      :record.trainingType=='PXLX014'?'M':record.trainingType=='PXLX015'?'N':record.trainingType=='PXLX016'?'P':''}}</div>
-                                    <div class="info">{{record.className}}</div> -->
-                                    <!-- <div class="info_div">{{record.subjectCode=='KM001'?'科目一':record.subjectCode=='KM002'?'科目二':record.subjectCode=='KM003'?'科目三':''}}</div> -->
-                                    <!--
-                                    <div class="info_div">{{record.hours}}</div>
-                                    <div class="info_div">{{record.hours}}</div>
-                                    -->
-                                  <!-- </div> 
-                                </i-col>
-                              </i-col> -->
-                              <!-- <i-col span="5" i-class="textPadding">
-                                <div class="btnDiv noclass" v-if="record.status=='YKZT001'" disabled><span>待签到</span></div>
-                                <div class="btnDiv" v-if="record.status=='YKZT002'" @click="confirm(record.id)"><span>待确认</span></div>
-                                <div class="btnDiv noclass" v-else-if="record.status=='YKZT003'" disabled><span>未签到</span></div>
-                                <div class="btnDiv noclass" v-else-if="record.status=='YKZT004'" disabled><span>已完成</span></div>
-                              </i-col> -->
                           </view>
                       </i-collapse-item>
                   </i-collapse>
@@ -113,14 +76,12 @@
           <span>提示</span>
         </div>
         <p>学员是否学车?</p>
-      <!-- <view class="slot">
-        <i-button i-class="leftBtn" v-on:click="goCancel">取消</i-button>
-        <i-button i-class="rightBtn" type="primary" size="large" v-on:click="goConfirm">确认</i-button>
-      </view> -->
     </i-modal>
   </div>
 </template>
 <script>
+  import { getDictValue } from '../../utils/public';
+  import { getDictData } from '../../utils/util';
   export default {
     created() {
       
@@ -128,35 +89,13 @@
     data(){
       return {
         date:"",
-        coachId: wx.getStorageSync("userId"),
+        coachId:"",
         activeIndex: 1,
         content:'123',
         flag:true,
         visible:false,
         courseRecordId:"",
-        tabs: [
-          {
-            id: 1,
-            tabName: '10-18',
-            date:'星期五'
-          }, {
-            id: 2,
-            tabName: '10-18',
-            date:'星期五'
-          }, {
-            id: 3,
-            tabName: '10-18',
-            date:'星期五'
-          }, {
-            id: 4,
-            tabName: '10-18',
-            date:'星期五'
-          }, {
-            id: 5,
-            tabName: '10-18',
-            date:'星期五'
-          }
-        ],
+        tabs: [],
         dataList:{
           partTwoCourseHour:'',
           partThreeCourseHour:'',
@@ -179,39 +118,25 @@
             }
           ]
         },
-        schedule:[
-          {
-            time:'10:00-12:00',
-            classStyle:'科目二',
-            classdetail:'1/3',
-            name:'cc',
-            sex:'女',
-            tel:'18501190475',
-            finishclass:'12',
-            licenseType:'C1',
-            classType:'普通班',
-            status:'待确认'
-          },
-          {
-            time:'13:00-15:00',
-            classStyle:'科目二',
-            classdetail:'1/3',
-            name:'cc',
-            sex:'女',
-            tel:'18501190475',
-            finishclass:'12',
-            licenseType:'C1',
-            classType:'普通班',
-            status:'待确认'
-          }
-        ]
+        schedule:[],
+        pagination:{
+          current:1,
+          pageSize:20
+        },
+        arr:[],
+        records:{},
+        listData:[]
       }
     },
     onShow(){
       // this.getToken();
     },
     onLoad(){
-      // console.log('onload');
+      this.coachId = wx.getStorageSync('employeeId');
+      getDictData().then( dictionary =>{
+        var that = this;
+        this.listData = dictionary;
+      })
       var myDate = new Date();//获取系统当前时间
       var year = myDate.getFullYear();
       var month = myDate.getMonth() + 1;
@@ -219,19 +144,14 @@
       var h = myDate.getHours(); //获取系统时，
       var m = myDate.getMinutes(); //分
       this.date = year+'-'+month+'-'+strDate;
-      this.coachId = wx.getStorageSync("userId");
-      this.getClassList(this.getDays(0));
-      //var weekDay = ["星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];  
-      //var myDate = new Date(Date.parse(this.getDays(0)));  
-      //console.log(weekDay[myDate.getDay()]);
-      // this.day.push(weekDay[myDate.getDay()])
+      this.queryAll(this.getDays(0));
     },
     computed:{
       getLeftDates(){//获取近8天日期
         console.log('computed')
         let dayArr = [];
         var weekDay = ["星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];  
-        for(var i = -1;i<6;i++){
+        for(var i = -1;i<15;i++){
           var myDate = new Date(Date.parse(this.getDays(i)));
           // dayArr.push(this.getDays(i))
           dayArr.push({time:this.getDays(i),day:weekDay[myDate.getDay()]})
@@ -240,41 +160,39 @@
         return dayArr;
       }
     },
-    created(){console.log('created')},
     methods:{
-      // 校验token
-      getToken(){
-        let token = wx.getStorageSync('token');
-        this.$httpWX.get({
-          url:this.$api.timetable.checkAuthentication+"/"+token,
+      queryAll(day){
+        this.$httpWX.post({
+          url:this.$api.timetable.query,
           data:{
-
+            params:{
+              courseDate:day,
+              coachId:this.coachId,
+              recordStatus:1
+            },
+            pagination:this.pagination
           }
         }).then(res=>{
-          console.log('token',res);
-          if(res.status.code * 1 !== 10){
-            wx.showLoading();
-            wx.hideLoading();
-            setTimeout( () => {
-              wx.showToast({
-                title: '请重新登录!',
-                icon: "none",
-              });
-              setTimeout( () =>{
-                wx.hideToast();  
-              },2000)
-            },10);
-            wx.reLaunch({
-              url:"/pages/login/main"
-            })
-          }
+          this.records = {};
+          this.dataList = res.data;
+          var arr = {};
+          var keys = Object.keys(this.dataList.records);
+          keys.sort()
+          keys.forEach(key =>{
+            var s = key.split('|');
+            var a = getDictValue(this.listData,'km',s[1]);
+            arr[key] = []
+            arr[key].push({a:s[0],km:a,num:s[2],c:Math.max.apply(null,s[3].split(','))});
+            this.records[key] = this.dataList.records[key];
+          })
+          console.log('1212112',this.records);
+          // console.log('arr',arr);
+          this.arr = arr;
         })
       },
-      cc(){return 1},
       changeTab: function (date,tabindex) {
         console.log(date);
-        //this.content = tabname;
-        this.getClassList(date.time);
+        this.queryAll(date.time);
         this.activeIndex = tabindex;
       },
       goCancel(){
@@ -284,20 +202,22 @@
         this.$httpWX.post({
             url: this.$api.timetable.sign,
             data: {
-              courseRecordId: this.courseRecordId,
-              userType: "employee"
+              params:{
+                id:this.courseRecordId,
+                confirmStatus:1
+              }
             }
           })
         .then(res => {
           console.log(res)
           wx.showToast({
-            title: res.status.message,
+            title: res.data,
             icon: 'succes',
             duration: 1000,
             mask:true
           })
           this.visible = false;
-          this.getClassList(this.getDays(0));
+          this.queryAll(this.getDays(0));
         });
       },
       confirm(id){
@@ -316,21 +236,7 @@
           })
         },
         getClassList(day){
-            this.$httpWX
-            .post({
-              url: this.$api.timetable.gerRecordByCoach,
-              data: {
-                coachId: this.coachId,
-                trainingDate: day
-              }
-            })
-            .then(res => {
-              console.log(this.coachId+','+day)
-              console.log(res)
-              if(res.status.code=='10'){
-              this.dataList = res.content;
-              }
-            });
+
         },
         getDays(addDay){
           let d = new Date();
@@ -347,7 +253,7 @@
    * 页面相关事件处理函数--监听用户下拉动作
    */
     onPullDownRefresh() {
-      this.getClassList(this.getDays(this.activeIndex-1));
+      this.queryAll(this.getDays(0));
       this.activeIndex = this.activeIndex;
       wx.stopPullDownRefresh();
     },
@@ -381,6 +287,8 @@
 }
 .left_tabbar {
   width: 24%;
+  height: 500px;
+  overflow: scroll;
 }
 .right_content {
   width: 76%;

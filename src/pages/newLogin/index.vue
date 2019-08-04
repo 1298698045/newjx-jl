@@ -33,11 +33,17 @@
             </div>
             <div class="btnWrap">
                 <button class="quitBtn" @click="getVerification">验证</button>
-                <p>
+                <!-- <p>
                     <span @click="routeLogin">已有账号，直接登录</span>
-                </p>
+                </p> -->
             </div>
         </div>
+        <div class="footer">
+                <i-divider content="微信授权手机号登录"></i-divider>
+                <button class="btn" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber" @click="handleDuration">
+                    <i class="iconfont icon-weixin-copy" style="color:#1cb934;font-size:50px;"></i>
+                </button>
+            </div>
         <i-modal i-class="modal" :visible="isModal" :show-cancel="false" @ok="getOk">
             <div>
                 <i-icon type="success_fill" size="80" color="#7ed321" />
@@ -60,10 +66,81 @@ export default {
             isModal:false,
             second: 61,
             house1: true,
-            house2:false
+            house2:false,
+            errMsg:"",
+            iv:"",
+            encryptedData:"",
+            lcode:"",
+            openid:"",
+            phone:"",
+            userInfo:"",
+            employeeId:"",
+            tenantId:"",
+            name:"", // 教练名字
+            mobile:"" // 教练手机号
         }
     },
+    onLoad(){
+        this.login();
+    },
     methods: {
+        login(){
+            var that = this;
+            wx.login({
+                success:res=>{
+                    console.log(res.code);
+                    that.lcode = res.code;
+                    that.$httpWX.post({
+                        url:that.$api.login.code,
+                        data:{
+                            params:{
+                                code:res.code
+                            }
+                        }
+                    }).then(res=>{
+                        that.openid = res.data.openid;
+                        wx.setStorageSync('openid',that.openid);
+                        wx.setStorageSync('token',res.data.token);
+                        // if(res.data.hasBind==1){
+                        //     this.getCoachDetail();
+                        // }
+                    })
+                }
+            })
+        },
+        getPhoneNumber(e){
+            this.errMsg = e.mp.detail.errMsg;
+            this.iv = e.mp.detail.iv;
+            this.encryptedData = e.mp.detail.encryptedData;
+            return new Promise((resolve,reject)=>{
+                if(this.errMsg == 'getPhoneNumber:fail user deny'){
+                    console.log('拒绝授权')
+                    return false;
+                }else {
+                    this.$httpWX.post({
+                        url:this.$api.login.phone,
+                        data:{
+                            params:{
+                                encryptedData:this.encryptedData,
+                                iv:this.iv
+                            }
+                        }
+                    }).then(res=>{
+                        console.log(res);
+                        if(res.code==0){
+                            this.phone = res.data.mobile;
+                            wx.setStorageSync('phone',this.phone);
+                            if(res.data.type=='employee_bind_success'){
+                                this.getCoachDetail();
+                            }else if(res.data.type=='employee_already_bind'){
+                                this.getCoachDetail();
+                            }
+                        }
+                    })
+                }
+            })
+
+        },
         getCode(){
             if(this.phone == ''){
                 wx.showToast({
@@ -81,16 +158,18 @@ export default {
                 this.$httpWX.post({
                         url:this.$api.login.send,
                         data:{
-                            mobiles:[this.phone],
-                            template_id:"COACH"
+                            params: {
+                                code: this.lcode,
+                                mobile: this.phone
+                            }
                         }
                 }).then(res=>{
                     console.log(res);
-                    if(res.status.code * 1 === 10){
+                    if(res.code === 0){
                         this.gainCode();
                     }else {
                         wx.showToast({
-                            title: res.status.message,
+                            title: res.msg,
                             icon: 'none',
                             duration: 2000
                         })
@@ -99,27 +178,20 @@ export default {
             }
         },
         gainCode(){
-            // let telStr = /^[1](([3][0-9])|([4][5-9])|([5][0-3,5-9])|([6][5,6])|([7][0-8])|([8][0-9])|([9][1,8,9]))[0-9]{8}$/;
-            // let phone = this.phone;
-            // if(!(telStr.test(phone))){
-            //     console.log('手机号码不规范')
-            // }else {
-            //     console.log('校验成功');
-                var that = this;
-                var second = this.second;
-                if(second == 0){
-                    this.second = 61;
-                    this.house1 = true;
-                    this.house2 = false;
-                    return ;
-                }
-                var time  = setTimeout(()=>{
-                    this.second--;
-                    this.house1 = false,
-                    this.house2 = true;
-                    this.gainCode();
-                },1000)
-            // }
+            var that = this;
+            var second = this.second;
+            if(second == 0){
+                this.second = 61;
+                this.house1 = true;
+                this.house2 = false;
+                return ;
+            }
+            var time  = setTimeout(()=>{
+                this.second--;
+                this.house1 = false,
+                this.house2 = true;
+                this.gainCode();
+            },1000)
         },
         onChangePhone(e){
             this.phone = e.mp.detail;
@@ -150,25 +222,48 @@ export default {
                return false;
            }else {
                this.$httpWX.post({
-                   url:this.$api.login.verification,
+                   url:this.$api.login.vlogin,
                    data:{
-                       mobiles:[this.phone],
-                       captcha:this.code
+                        params: {
+                            mobile: this.phone,
+                            vcode: this.code
+                        }
                    }
                }).then(res=>{
-                   if(res.status.code * 1 === 10){
-                       wx.setStorageSync('id',res.content.id);
-                       wx.setStorageSync('newInfo',JSON.stringify(res.content));
-                       this.isModal = true;
-                   }else {
-                        wx.showToast({
-                            title: res.status.message,
-                            icon: 'success',
-                            duration: 2000
-                        })
-                   }
+                    wx.setStorageSync('token',res.data.token.accessToken);
+                    if(res.code==0){
+                        this.phone = res.data.mobile;
+                        wx.setStorageSync('phone',this.phone);
+                        if(res.data.type=='employee_bind_success'){
+                            this.getCoachDetail();
+                        }else if(res.data.type=='employee_already_bind'){
+                            this.getCoachDetail();
+                        }
+                    }
                })
            }
+        },
+        getCoachDetail(){
+          this.$httpWX.post({
+              url:this.$api.public.coachDetail,
+              data:{
+
+              }
+          }).then(res=>{
+              console.log(res);
+              if(res.code==0){
+                  this.employeeId = res.data.coachInfo.employeeId;
+                  this.tenantId = res.data.tenantId;
+                  this.name = res.data.name;
+                  this.mobile = res.data.mobile;
+                  wx.setStorageSync('coachName',this.name);
+                  wx.setStorageSync('mobile',this.mobile);
+                  wx.setStorageSync('employeeId',this.employeeId);
+                  wx.setStorageSync('tenantId',this.tenantId);
+                  const url = '/pages/timetable/main';
+                  wx.switchTab({url:url});
+              }
+          })
         },
         getOk(){
             this.isModal = false;
@@ -186,4 +281,22 @@ export default {
 
 <style lang="scss">
     @import '../../../static/assets/login.scss';
+    @import '../../../static/assets/login.scss';
+    @font-face {
+        font-family: 'iconfont';
+        src: url(data:font/truetype;charset=utf-8;base64,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) format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    .iconfont {
+        font-family: "iconfont" !important;
+        font-size: 16px;
+        font-style: normal;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .icon-weixin-copy:before {
+        content: "\e652";
+    }
 </style>

@@ -49,6 +49,12 @@
         </p>
         <p>更换用车</p>
       </div>
+      <div class="rowBox" @click="toPage('/pages/overtime/main')">
+        <p>
+          <image src="/static/images/icon3.png" style="width:44px;height:44px;"></image>
+        </p>
+        <p>加班时段</p>
+      </div>
     </div>
     <!-- <div class="boxWrap"> -->
       <!-- <i-row i-class="rowBox"  @click="toPage('/pages/AskForLeave/main')">
@@ -95,50 +101,8 @@
       // this.getToken();
     },
     onLoad(){
-      this.getMycoach();
     },
     methods:{
-      // 校验token
-      getToken(){
-        let token = wx.getStorageSync('token');
-        this.$httpWX.get({
-          url:this.$api.timetable.checkAuthentication +  "/"+token,
-          data:{
-
-          }
-        }).then(res=>{
-          console.log('token',res);
-          if(res.status.code * 1 !== 10){
-            wx.showLoading();
-            wx.hideLoading();
-            setTimeout( () => {
-              wx.showToast({
-                title: '请重新登录!',
-                icon: "none",
-              });
-              setTimeout( () =>{
-                wx.hideToast();  
-              },2000)
-            },10);
-            wx.reLaunch({
-              url:"/pages/login/main"
-            })
-          }
-        })
-      },
-      // 查询教练
-    getMycoach(){
-      this.$httpWX.get({
-        url: this.$api.detail.queryById + "/" + wx.getStorageSync('userId'),
-        data:{
-          
-        }
-      }).then(res=>{
-        console.log(res);
-        wx.setStorageSync('timeIntervalId',res.content.timeIntervalId);
-        wx.setStorageSync('coachName',res.content.name)
-      })
-    },
       toPage(urls){
         wx.navigateTo({
           url:urls
@@ -174,11 +138,14 @@ font-size:35px;
   height: 100%;
   margin: 0 auto;
   display: flex;
+  flex-wrap:wrap;
+  // flex-flow: row wrap;
+  // align-content: flex-start;
 }
 .boxWrap .rowBox{
   width:159px;
   padding:90rpx 0;
-  margin:45rpx 20rpx;
+  margin:20rpx 16rpx;
   background: #fff;
   box-shadow:0 1px 1px rgba(0,0,0,0.1);
   border-radius: 5px;

@@ -1,5 +1,5 @@
 {
-    "navigationBarTitleText": "Aplus教练宝",
+    "navigationBarTitleText": "好易驾",
     "enablePullDownRefresh": false,
     "usingComponents": {
       "i-input": "/static/view/input/index",

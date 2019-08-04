@@ -6,23 +6,31 @@
         <h3>
           <!-- <span>|</span> -->
           待休假
-          <span>{{contList.length}}</span>
+          <span>{{list.length}}</span>
           <!-- （x课时） -->
         </h3>
         <div class="content">
-          <div class="row" v-for="(item,index) in contList" :key="index">
+          <div class="row" v-for="(item,index) in list" :key="index">
             <i-row>
-              <i-col i-class="icol" span="6">
-                <p>{{item.leaveDate}}</p>
+              <i-col span="4">
+                <p class="p_time">开始时间</p>
+                <p class="p_time">结束时间</p>
               </i-col>
-              <i-col i-class="icol" span="4">
-                <p>{{item.weekDay=='0'?'星期一':item.weekDay=='1'?'星期二':item.weekDay=='2'?'星期三':item.weekDay=='3'?'星期四':item.weekDay=='4'?'星期五':item.weekDay=='5'?'星期六':item.weekDay=='6'?'星期日':''}}</p>
+              <i-col span="10">
+                <p class="p_col p_time">{{item.vacationStartDate}}  {{item.vacationStartTime}}</p>
+                <p class="p_col p_time">{{item.vacationEndDate}}    {{item.vacationEndTime}}</p>
               </i-col>
-              <i-col i-class="icol" span="8">
-                <p>{{item.amFlag=='0'?'上午':item.amFlag=='1'?'下午':''}}</p>
+              <i-col span="4">
+                <div style="margin-top:20rpx;">
+                  <i-button i-class="ibtn" @click="getRevoke(item)">撤销</i-button>
+                </div>
+                <div v-if="item.auditStatus==2">
+                  <i-button i-class="ibtn btn_active btn_one" @click="getDelete(item)">删除</i-button>
+                  <i-button i-class="ibtn btn_active">修改</i-button>
+                </div>
               </i-col>
-              <i-col i-class="icol" span="4" @click="getRevoke(item)">
-                <i-button i-class="ibtn">撤销</i-button>
+              <i-col span="6" i-class="r">
+                <p>•{{item.auditStatus==0?'审核中':item.auditStatus==1?'已完成':item.auditStatus==2?'已驳回':item.auditStatus==3?'已撤销':''}}</p>
               </i-col>
             </i-row>
           </div>
@@ -32,20 +40,22 @@
         <h3>
           <!-- <span>|</span> -->
           已休假
-          <span>{{list.length}}</span>
+          <span>{{contList.length}}</span>
           <!-- （x课时） -->
         </h3>
         <div class="boxCont">
-          <div class="rows" v-for="(item,idx) in list" :key="idx">
+          <div class="rows"  v-for="(item,index) in contList" :key="index">
             <i-row>
-              <i-col i-class="icol" span="6">
-                <p>{{item.leaveDate}}</p>
+              <i-col span="4">
+                <p class="p_time">开始时间</p>
+                <p class="p_time">结束时间</p>
               </i-col>
-              <i-col i-class="icol" span="4">
-                <p>{{item.weekDay=='0'?'星期一':item.weekDay=='1'?'星期二':item.weekDay=='2'?'星期三':item.weekDay=='3'?'星期四':item.weekDay=='4'?'星期五':item.weekDay=='5'?'星期六':item.weekDay=='6'?'星期日':''}}</p>
+              <i-col span="14">
+                 <p class="p_col p_time">{{item.vacationStartDate}}  {{item.vacationStartTime}}</p>
+                <p class="p_col p_time">{{item.vacationEndDate}}    {{item.vacationEndTime}}</p>
               </i-col>
-              <i-col i-class="icol" span="8">
-                <p>{{item.amFlag=='0'?'上午':item.amFlag=='1'?'下午':''}}</p>
+              <i-col span="6" i-class="r">
+                <p>{{item.auditStatus==0?'审核中':item.auditStatus==1?'已完成':item.auditStatus==2?'已驳回':item.auditStatus==3?'已撤销':''}}</p>
               </i-col>
             </i-row>
           </div>
@@ -61,14 +71,14 @@
         <p>您还没有相关记录呢~</p>
       </div>
     </div>
-    <i-modal i-class="modal" :visible="visible" :show-ok="false" :show-cancel="false">
-      <view>
+    <i-modal i-class="modal" :visible="visible" @ok="goConfirm" @cancel="goCancel">
+      <div>
         <span>是否取消休假？</span>
-      </view>
-      <view class="slot">
+      </div>
+      <!-- <view class="slot">
         <i-button i-class="leftBtn" v-on:click="goCancel">取消</i-button>
         <i-button i-class="rightBtn" type="primary" size="large" v-on:click="goConfirm">确认</i-button>
-      </view>
+      </view> -->
     </i-modal>
   </div>
 </template>
@@ -83,23 +93,50 @@ export default {
       visible:false,
       id:"",
       leaveDate:"",
-      amFlag:""
+      amFlag:"",
+      pagination:{
+         current: 0,
+         pageSize: 10,
+      },
+      date:"",
+      employeeId:""
     };
   },
   onLoad(){
+    this.employeeId = wx.getStorageSync('employeeId');
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    this.date = y + "-" + m + "-" + day;
     this.getQueryList();
+    this.get2QueryList();
   },
   methods: {
     getQueryList(){
-      this.$httpWX.get({
-        url:this.$api.leave.getOffRecordList+"/"+wx.getStorageSync('userId'),
+      this.$httpWX.post({
+        url:this.$api.leave.getRecordList,
         data:{
-
+          params:{
+            employeeId:this.employeeId
+          }
         }
       }).then(res=>{
-        console.log(res);
-        this.contList = res.content.offList;
-        this.list = res.content.alreadyOffList;
+        let list = res.data.list;
+        this.list = list;
+      })
+    },
+    get2QueryList(){
+      this.$httpWX.post({
+        url:this.$api.leave.getOffRecordList,
+        data:{
+          params:{
+            employeeId:this.employeeId
+          }
+        }
+      }).then(res=>{
+        let list = res.data.list;
+        this.contList = list;
       })
     },
     goCancel(){
@@ -109,23 +146,17 @@ export default {
       this.$httpWX.post({
         url:this.$api.leave.cancleOff,
         data:{
-          id:this.id,
-          leaveDate:this.leaveDate,
-          amFlag:this.amFlag,
-          coachId:wx.getStorageSync('userId')
+          params:{
+            vacationId:this.id
+          }
         }
       }).then(res=>{
         console.log(res);
-        // wx.showToast({
-        //   title:res.status.message,
-        //   icon:'none',
-        //   duration: 2000
-        // })
         wx.showLoading();
         wx.hideLoading();
         setTimeout( () => {
           wx.showToast({
-            title: res.status.message,
+            title: res.msg,
             icon: "none",
           });
           setTimeout( () =>{
@@ -134,6 +165,27 @@ export default {
         },0);
         this.visible = false;
         this.getQueryList();
+      })
+    },
+    getDelete(item){
+      this.$httpWX.post({
+        url:this.$api.leave.delete,
+        data:{
+          params:{
+            vacationId:item.id
+          }
+        }
+      }).then(res=>{
+        wx.showToast({
+            title: res.msg,
+            icon:"success",
+            duration: 2000,
+            success: () => {
+                setTimeout(()=>{
+                    this.getQueryList();
+                },1000)
+            }
+        })
       })
     },
     // 撤销
@@ -148,7 +200,6 @@ export default {
    * 页面相关事件处理函数--监听用户下拉动作
    */
     onPullDownRefresh() {
-      this.getQueryList();
       wx.stopPullDownRefresh();
     },
     /**
@@ -206,17 +257,17 @@ export default {
           color: #5e5e5e;
           border-bottom: 1rpx solid #faf9f9;
           padding:30rpx 0;
-          .icol {
-            // text-align: center;
-            // padding: 20rpx 0;
-            p {
-              margin-top: 10rpx;
-            }
+          .p_col{
+            color: #4f4f4f;
+            font-weight: bold;
+          }
+          .p_time{
+            margin: 8rpx 0;
           }
           .ibtn {
             width: 140rpx !important;
-            height: 50rpx !important;
-            line-height: 50rpx !important;
+            height: 24px !important;
+            line-height: 24px !important;
             font-size: 24rpx !important;
             color: #fb7015 !important;
             margin: 0 !important;
@@ -224,6 +275,21 @@ export default {
             background: #fff !important;
             border: 1rpx solid #fb7015 !important;
             box-sizing: border-box !important;
+          }
+          .btn_active{
+            height: 20px!important;
+            line-height: 20px!important;
+          }
+          .btn_one{
+            border:1rpx solid #b1b1b1!important;
+            color: #b1b1b1!important;
+            margin-bottom: 10rpx!important;
+          }
+          .r{
+            p{
+              text-align: right;
+              margin-top: 25rpx;
+            }
           }
         }
         .row:last-child {
@@ -266,9 +332,18 @@ export default {
           font-size: 24rpx;
           color: #5e5e5e;
           border-bottom: 1rpx solid #faf9f9;
-          padding:40rpx 0;
-          .icol {
-            // padding: 30rpx 0 !important;
+          padding:30rpx 0;
+          .p_col{
+            color: #4f4f4f;
+            font-weight: bold;
+          }
+          .p_time{
+            margin: 8rpx 0;
+          }
+          .r{
+            text-align: right;
+            margin-top: 25rpx;
+            color: #979797;
           }
         }
         .rows:last-child {
@@ -297,9 +372,9 @@ export default {
     }
   }
 .modal{
-  view {
+  div {
     color: #212121 !important;
-    margin:20rpx 0;
+    margin:20px 0;
     span {
       color: black;
       font-size: 30rpx;

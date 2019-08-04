@@ -1,14 +1,15 @@
 {
   "pages": [
-    "pages/tLogin/main",
     "pages/newLogin/main",
+    "pages/timetable/main",  
+    "pages/my/main",
+    "pages/tLogin/main",
     "pages/login/main",
     "pages/setupPass/main",
     "pages/firstLogin/main",
     "pages/workbench/main",
     "pages/overtime/main",  
     "pages/repairRegister/main",
-    "pages/timetable/main",  
     "pages/index/main",
     "pages/AskForLeave/main",   
     "pages/replacementCar/main",
@@ -19,7 +20,6 @@
     "pages/fuelReport/main",
     "pages/toExamine/main",
     "pages/changePassword/main",  
-    "pages/my/main",
     "pages/totalPassRate/main",
     "pages/teachStudent/main",
     "pages/repairRecord/main",
@@ -35,16 +35,19 @@
     "pages/feedback/main",
     "pages/activity/main",
     "pages/activityDetail/main",
-    "pages/wimg/main"
+    "pages/wimg/main",
+    "pages/myStudent/main",
+    "pages/studentDetail/main",
+    "pages/queryStudent/main"
 
   ],
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#f6f6f6",
-    "navigationBarTitleText": "爱加教练",
+    "navigationBarTitleText": "好易驾",
     "navigationBarTextStyle": "black"
   },
-  "navigateToMiniProgramAppIdList": ["wxe825ca816def4b19"],
+  "navigateToMiniProgramAppIdList": ["wx7ef4b13584f6cb2e"],
   "tabBar": {
     "color": "#aeaeae",
     "selectedColor": "#ff3f00",

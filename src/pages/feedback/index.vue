@@ -42,22 +42,22 @@ export default {
             }
             let url = this.$api.my.addOrUpdate
             let params = {
-                content: this.content,
-                source: 'COACH',
-                status: 'UNHANDLE',
-                feedbackName: wx.getStorageSync('userName'),
-                feedbackPhone: wx.getStorageSync('phone'),
-                schoolId: wx.getStorageSync('schoolId'),
+                params:{
+                    openid:"",
+                    platform:"jx_teacher_app",
+                    contact:"",
+                    message:this.content
+                }
             }
             this.$httpWX.post({
                 url,
                 data: params
             }).then(res => {
                 wx.showToast({
-                    title: res.msg,
+                    title: res.data,
                     duration: 2000,
                     success: () => {
-                        if (res.code * 1 === 200) {
+                        if (res.code == 0) {
                             setTimeout(() => {
                                 wx.switchTab({url:'/pages/my/main'})
                             }, 1000);

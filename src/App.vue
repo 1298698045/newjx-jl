@@ -8,8 +8,10 @@ export default {
     wx.setStorageSync('logs', logs)
 
     console.log('app created and cache logs by setStorageSync')
-  }
+  },
+  globalData:{}
 }
+
 </script>
 
 <style>

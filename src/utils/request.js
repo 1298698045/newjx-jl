@@ -1,7 +1,4 @@
-// const host = 'https://test.api.aplusx.com/apijx'  // 测试环境
-// const host = 'http://192.168.1.221:8185' // 开发环境
-// const host =  'https://api.aplusx.com/jiaxiao' // 正式环境
-const host = 'https://jxapitest.aplusx.com'
+const host = 'https://jxactivetest.aplusx.com'
  
 function request (url, method, data, header = {}) {
   wx.showLoading({

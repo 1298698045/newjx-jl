@@ -101,9 +101,9 @@ export default {
               }, 2000);
             }, 0);
             if(res.status.code * 1 === 10){
-              wx.redirectTo({
-                url: "/pages/tLogin/main"
-              });
+              wx.switchTab({
+                url: '/pages/timetable/main'
+              })
               wx.setStorageSync("code", "1");
             }
           });

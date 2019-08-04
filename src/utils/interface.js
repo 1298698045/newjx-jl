@@ -1,11 +1,22 @@
 const v = '/v1'
 const api = {
+    public:{
+        dictionary:"/api/dictionary",
+        coachDetail:"/api/schooladministration/get-login-employee",
+        bind_teant:"/api/user/bind-tenant"  // 绑定租户
+    },
     // 登录相关
     login:{
-        send:v+"/aplus-jx-public/sms/send", // 获取验证码
-        verification:v+"/aplus-jx-public/sms/verification", // 验证
+        code:"/api/wxuser/login", // 获取openid
+        phone:"/api/wxuser/encryption", // 解密手机号
+        send:"/api/sms/send", // 获取验证码
+        vlogin:"/api/user/vcode-login",
+        verification:v+"/api/wxuser/verification", // 登陆
         authentication:v+"/aplus-jx-public/universal/user/authentication", //登录
         updatePwd:v+"/aplus-jx-public/universal/user/updatePwd" //设置密码
+    },
+    coach:{
+        coachDetail:"/api/schooladministration/get-employee-by-uid"
     },
     detail:{
         queryById:v+"/aplus-jx-schooladministration/employee/queryById"
@@ -15,10 +26,11 @@ const api = {
         statistic:v+"/aplus-jx-schooladministration/clue/statistic",  // 线索统计数量
         generateWxCode:v+"/aplus-jx-schooladministration/employee/generateWxCode",  // 生成二维码
         checkAuthentication:v+"/aplus-jx-public/universal/user/checkAuthentication", // 校验token
-        myStudentCount:v+"/aplus-jx-study/student/api/me/myStudentCount", // 我的学员
+        myStudentCount:"/api/student/query-student-num-by-coachid", // 我的学员统计
         getReferralsCount:v+"/aplus-jx-schooladministration/coachReferrals/getReferralsCount", //转介绍总数
         employee:v+"/aplus-jx-schooladministration/employee/queryById" , //教练
-        addOrUpdate:v+"/aplus-yunying/opinion/addOrUpdate" // 意见反馈
+        addOrUpdate:"/api/leavemsg/save", // 意见反馈
+        position:"/api/schooladministration/get-position"
     },
     // 线索
     clue:{
@@ -33,35 +45,44 @@ const api = {
     },
     // 我的学员
     student:{
-        myStudents:v+"/aplus-jx-study/student/api/me/myStudents"
+        myStudents:v+"/aplus-jx-study/student/api/me/myStudents",
+        query:"/api/student/query-formal-student-by-coach",
+        queryDetail:"/api/student/query", // 学员详情接口
+        training:"/api/student/change-study-process", // 设置集训接口
+        trainRecord:"/api/student/course/record/query", // 训练记录接口
+        fractionRecord:"/api/student/grade/query-coach-student", // 成绩记录接口
+        statistics:"/api/student/query-student-num-by-status"
     },
     // 活动
     activity:{
-        getPageList:v+"/aplus-jx-koiactivity/group/wx/employee/getPageList", // 活动列表
-        myGroups:v+"/aplus-jx-koiactivity/group/wx/employee/myGroups", // 我的活动列表
-        saveEmployee:v+"/aplus-jx-koiactivity/group/wx/employee/saveEmployee", // 提交教练信息
-        detail:v+"/aplus-jx-koiactivity/group/wx/employee/detail" // 活动详情
+        getPageList:"/group/wx/employee/getPageList", // 活动列表
+        myGroups:"/group/wx/employee/myGroups", // 我的活动列表
+        saveEmployee:"/group/wx/employee/saveEmployee", // 提交教练信息
+        detail:"/group/wx/employee/detail" // 活动详情
     },
     userInfo:{
-        getOpenid:v+"/aplus-jx-koiactivity/group/wx/employee/getOpenid" // 获取openid
+        getOpenid:"/group/wx/employee/getOpenid" // 获取openid
     },
     // 更换用车
     car:{
-        getBindCarList:v+"/aplus-jx-finance/car/getBindCarList", // 车辆
-        changeCar:v+"/aplus-jx-schooladministration/employee/changeCar" // 更换车辆
+        getBindCarList:"/api/schooladministration/query-employee-cars", // 车辆
+        changeCar:"/api/schooladministration/change-employee-current-car" // 更换车辆
     },
     // 请假调休
     leave:{
         gerRecordByCoachIdAndTime:v+"/aplus-jx-schooladministration/leave/lieu/gerRecordByCoachIdAndTime",
         getOffTimes:v+"/aplus-jx-schooladministration/leave/lieu/getOffTimes",
-        off:v+"/aplus-jx-schooladministration/leave/lieu/off",
-        getOffRecordList:v+"/aplus-jx-schooladministration/leave/lieu/getOffRecordList",
-        cancleOff:v+"/aplus-jx-schooladministration/leave/lieu/cancleOff",
+        off:"/api/schooladministration/save-employee-vacation",
+        getOffRecordList:"/api/schooladministration/query-employee-finished-vacation", // 查询已休假
+        getRecordList:"/api/schooladministration/query-employee-not-begin-vacation", // 查询待休假
+        cancleOff:"/api/schooladministration/cancel-employee-vacation",
+        delete:"/api/schooladministration/del-employee-vacation",
     },
     // 课表
     timetable:{
+        query:"/api/student/course/record/coach/query",
         checkAuthentication:v+"/aplus-jx-public/universal/user/checkAuthentication",
-        sign:v+"/aplus-jx-study/course/booked/record/sign",
+        sign:"/api/student/course/record/update",
         gerRecordByCoach:v+"/aplus-jx-study/course/booked/record/gerRecordByCoach",
 
     },
@@ -72,10 +93,14 @@ const api = {
     },
     // 早晚班
     work:{
+        query:"/api/education/query-course-by-page", // 早晚班
         getOvertimeInterval:v+"/aplus-jx-study/time/interval/getOvertimeInterval",
         queryAll:v+"/aplus-jx-study/course/queryAll",
-        start:v+"/aplus-jx-study/course/start",
-        stop:v+"/aplus-jx-study/course/stop"
+        start:"/api/education/open-course-batch",
+        stop:"/api/education/close-course-batch"
+    },
+    classType:{
+        queryClass:"/api/education/query-class",
     }
 
 }
